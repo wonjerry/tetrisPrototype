@@ -82,6 +82,88 @@ function intersectCheck(y,x,block,board){
   return false;
 }
 
+function applyBlock(y,x,block,board){
+  var newBoard = [];
+
+  for(var i =0; i<BOARD_HEIGHT; i++){
+    newBoard[i] = board[i].slice();
+  }
+
+  for(var i = 0; i < 4; i++){
+    for(var j = 0; j < 4; j++){
+      if(block[i][j]){
+        newBoard[i][j] = 0;
+        newBoard[i+y][j+x] = 1;
+      }
+    }
+  }
+
+  return newBoard;
+}
+
+function deleteLine(board){
+  var newBoard = [];
+  var count = BOARD_HEIGHT;
+  for(var i=BOARD_HEIGHT; i --> 0;){
+    for(var j=0; j<BOARD_WIDTH; j++){
+      if(!board[i][j]){/* 0인 성분이 있으면 한줄이 다 안채워진것이므로 붙여넣기 해 준다.*/
+        /*count--로 아래부터 새로운 board를 채워주는 이유는 맨 아래줄부터 1로 채워진 줄이 있다면 자동적으로
+        새로운 board에는 추가되지 않기 때문이다. 이 이후에 맨위부터 count까지는 0으로 채워 주어야 한다.*/
+        newBoard[--count] = board[i].slice();
+        break;
+      }
+    }
+  }
+
+   function randomBlock(){
+     return BLOCKS[Math.floor(Math.random()*BLOCKS.length)];
+   }
+
+   function tetrisGame(){
+     this.blockX = 0;
+     this.blockY = 0;
+     this.isGameOver = false;
+     this.isPause = false;
+     this.score = 0;
+     this.currentBlock = randomBlock();
+     this.nextBlock = randomBlock();
+
+     this.board = [];
+
+     for(var i = 0; i < BOARD_HEIGHT; i++){
+       for(var j = 0; j< BOARD_WIDTH; j++){
+         board[i][j] = 0;
+       }
+     }
+   }
+
+   /*interval 함수의 인자로 쓰일 함수이다. 시간 간격 이후에 할 일을 정의한다.*/
+   tetrisGame.prototype.go = function() {
+     if(tetrisGame.isGameOver){
+       return false;
+     }
+
+     if(intersectCheck(this.blockY + 1,this.blockX,this.currentBlock,this.board)){
+       this.board = applyBlock(this.blockY,this.blockX,this.currentBlock,this.board);
+
+     }else{
+       this.blockY += 1;
+     }
+
+   }
+
+  for(var i =0; i<count; i++){
+    newBoard[i] = [];
+    for(var j = 0; j<BOARD_WIDTH; j++){
+      newBoard[i][j] = 0;
+    }
+  }
+  /*점수 계산을 위해 count값도 필요하기 때문에 객체로 만들어서 리턴 해 준다.*/
+  return {
+    'newBoard' : newBoard,
+    'deletedLine' : count
+  };
+}
 
 
 function draw_tetris(containerElement){
