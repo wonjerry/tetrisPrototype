@@ -4,7 +4,16 @@ var BOARD_HEIGHT = 20;
 var BLOCK_WIDTH = 30;
 var BLOCK_HEIGHT = 30;
 
-var FALLING_TIME = 40;
+var FALLING_TIME = 400;
+
+var KEY_ENTER = 13;
+var KEY_SPACE = 32;
+var KEY_LEFT = 37;
+var KEY_RIGHT = 39;
+var KEY_DOWN = 40;
+var KEY_A = 65;
+var KEY_D = 68;
+var KEY_R = 82;
 
 var BLOCKS = [
   [
@@ -73,7 +82,7 @@ function intersectCheck(y,x,block,board){
   for(var i = 0; i < 4; i++){
     for(var j = 0; j < 4; j++){
       if(block[i][j]){
-        if( i + y > BOARD_HEIGHT || j + x > BOARD_WIDTH || j + x < 0 || board[y+j][x+i]){
+        if( i + y >= BOARD_HEIGHT || j + x > BOARD_WIDTH || j + x < 0 || board[y+i][x+j]){
           return true; /* 움직였을 때 어떤 물체 또는 board 끝에 겹침을 뜻함*/
         }
       }
@@ -92,7 +101,6 @@ function applyBlock(y,x,block,board){
   for(var i = 0; i < 4; i++){
     for(var j = 0; j < 4; j++){
       if(block[i][j]){
-        newBoard[i][j] = 0;
         newBoard[i+y][j+x] = 1;
       }
     }
@@ -102,25 +110,37 @@ function applyBlock(y,x,block,board){
 }
 
 function deleteLine(board){
-  var newBoard = [];
-  var count = BOARD_HEIGHT;
-  for(var i=BOARD_HEIGHT; i --> 0;){
-    for(var j=0; j<BOARD_WIDTH; j++){
-      if(!board[i][j]){/* 0인 성분이 있으면 한줄이 다 안채워진것이므로 붙여넣기 해 준다.*/
-        /*count--로 아래부터 새로운 board를 채워주는 이유는 맨 아래줄부터 1로 채워진 줄이 있다면 자동적으로
-        새로운 board에는 추가되지 않기 때문이다. 이 이후에 맨위부터 count까지는 0으로 채워 주어야 한다.*/
-        newBoard[--count] = board[i].slice();
-        break;
+    var newBoard = [];
+    var count = BOARD_HEIGHT;
+    for(var i=BOARD_HEIGHT; i --> 0;){
+      for(var j=0; j<BOARD_WIDTH; j++){
+        if(!board[i][j]){/* 0인 성분이 있으면 한줄이 다 안채워진것이므로 붙여넣기 해 준다.*/
+          /*count--로 아래부터 새로운 board를 채워주는 이유는 맨 아래줄부터 1로 채워진 줄이 있다면 자동적으로
+          새로운 board에는 추가되지 않기 때문이다. 이 이후에 맨위부터 count까지는 0으로 채워 주어야 한다.*/
+          newBoard[--count] = board[i].slice();
+          break;
+        }
       }
     }
+
+    for(var i = 0; i < count; i++){
+      for(var j = 0; j < BOARD_WIDTH; j++){
+        newBoard[i][j] = 0;
+      }
+    }
+
+    return {
+      'board' : newBoard,
+      'deletedLineCount' : count
+    };
   }
 
    function randomBlock(){
      return BLOCKS[Math.floor(Math.random()*BLOCKS.length)];
    }
 
-   function tetrisGame(){
-     this.blockX = 0;
+   function TetrisGame(){
+     this.blockX = 3;
      this.blockY = 0;
      this.isGameOver = false;
      this.isPause = false;
@@ -131,61 +151,130 @@ function deleteLine(board){
      this.board = [];
 
      for(var i = 0; i < BOARD_HEIGHT; i++){
+       this.board[i] = [];
        for(var j = 0; j< BOARD_WIDTH; j++){
-         board[i][j] = 0;
+         this.board[i][j] = 0;
        }
      }
    }
 
    /*interval 함수의 인자로 쓰일 함수이다. 시간 간격 이후에 할 일을 정의한다.*/
-   tetrisGame.prototype.go = function() {
-     if(tetrisGame.isGameOver){
+   TetrisGame.prototype.go = function() {
+     /*document.write(this.blockY+"</br>");*/
+     /*document.write(this.board + "</br>");*/
+     if(TetrisGame.isGameOver){
        return false;
      }
 
-     if(intersectCheck(this.blockY + 1,this.blockX,this.currentBlock,this.board)){
-       this.board = applyBlock(this.blockY,this.blockX,this.currentBlock,this.board);
-
+     if(intersectCheck(this.blockY + 1, this.blockX ,this.currentBlock, this.board)){
+       this.board = applyBlock(this.blockY, this.blockX ,this.currentBlock, this.board);
+       var r = deleteLine(this.board);
+       this.board = r.board;
+       this.score += r.deleteLine;
+       this.currentBlock = this.nextBlock;
+       this.nextBlock = randomBlock();
+       this.blockX = 3;
+       this.blockY = 0;
      }else{
        this.blockY += 1;
      }
-
+     return true;
    }
 
-  for(var i =0; i<count; i++){
-    newBoard[i] = [];
-    for(var j = 0; j<BOARD_WIDTH; j++){
-      newBoard[i][j] = 0;
-    }
-  }
-  /*점수 계산을 위해 count값도 필요하기 때문에 객체로 만들어서 리턴 해 준다.*/
-  return {
-    'newBoard' : newBoard,
-    'deletedLine' : count
-  };
+TetrisGame.prototype.steerLeft = function() {
+  if(!intersectCheck(this.blockY, this.blockX - 1 ,this.currentBlock, this.board)){
+      this.blockX -= 1;
+   }
 }
 
+TetrisGame.prototype.steerRight = function() {
+  if(!intersectCheck(this.blockY, this.blockX + 1 ,this.currentBlock, this.board)){
+      this.blockX += 1;
+   }
+}
 
-function draw_tetris(containerElement){
-  var leftPanel = draw_tetrisLeftPanel();
-  var rightPanel = draw_tetrisRightPanel();
-  containerElement.append(leftPanel);
-  containerElement.append(rightPanel);
+TetrisGame.prototype.steerDown = function() {
+  if(!intersectCheck(this.blockY+1, this.blockX ,this.currentBlock, this.board)){
+      this.blockY += 1;
+   }
+}
+
+TetrisGame.prototype.rotateLeft = function() {
+  var newBlock = rotateLeft(this.currentBlock);
+  if(!intersectCheck(this.blockY, this.blockX ,newBlock, this.board)){
+      this.currentBlock = newBlock;
+   }
+}
+
+TetrisGame.prototype.rotateRight = function() {
+  var newBlock = rotateRight(this.currentBlock);
+  if(!intersectCheck(this.blockY, this.blockX ,newBlock, this.board)){
+      this.currentBlock = newBlock;
+   }
+}
+
+TetrisGame.prototype.letFall = function() {
+  while(!intersectCheck(this.blockY + 1, this.blockX ,this.currentBlock, this.board)){
+      this.blockY += 1;
+   }
+}
+
+TetrisGame.prototype.getBlockX = function() {
+  return this.blockX;
+}
+
+TetrisGame.prototype.getBlockY = function() {
+  return this.blockY;
+}
+
+TetrisGame.prototype.getisGameover = function() {
+  return this.isGameOver;
+}
+
+TetrisGame.prototype.getisPause = function() {
+  return this.isPause;
+}
+
+TetrisGame.prototype.getScore = function() {
+  return this.score;
+}
+TetrisGame.prototype.getCurrentBlock = function() {
+  return this.currentBlock;
+}
+
+TetrisGame.prototype.getNextBlock = function() {
+  return this.nextBlock;
+}
+
+TetrisGame.prototype.getBoard = function() {
+  return this.board;
+}
+
+function draw_tetris(game, ispaused){
+
+  var gameElem = document.createElement('div');
+  gameElem.classList.add('tetrisGame');
+  var leftPanel = draw_tetrisLeftPanel(game);
+  var rightPanel = draw_tetrisRightPanel(game);
+  gameElem.append(leftPanel);
+  gameElem.append(rightPanel);
+
+  return gameElem;
 }
 
 function draw_tetrisRightPanel(game) {
-  /*var boardElem = draw_tetrisBoard(game);*/
+  var boardElem = draw_tetrisBoard(game);
   var rightPaneElem = document.createElement('div');
-  rightPaneElem.classList.add('tetrisRightPane');
-  /*rightPaneElem.appendChild(boardElem);*/
+  rightPaneElem.classList.add('tetrisRightPanel');
+  rightPaneElem.appendChild(boardElem);
   return rightPaneElem;
 }
 
-function draw_tetrisLeftPanel(){
+function draw_tetrisLeftPanel(game){
   var leftPanel = document.createElement('div');
   leftPanel.classList.add('tetrisLeftPanel');
   var nextBlockPanel = draw_nextBlock();
-  var scorePanel = draw_score();
+  var scorePanel = draw_score(game);
   var keysPanel = draw_keys();
 
   leftPanel.append(scorePanel);
@@ -199,7 +288,24 @@ function draw_block(game){
 }
 
 function draw_tetrisBoard(game){
+  var boardElem = document.createElement('div');
+  boardElem.classList.add('tetrisBoard');
+  var gameBoard = game.getBoard();
+  document.write(gameBoard);
+  for(var i = 0; i < BOARD_HEIGHT; i++){
+    for(var j = 0; j < BOARD_WIDTH; j++){
+      var blockElem = document.createElement('div');
+      blockElem.classList.add('tetrisBlock');
+      if(gameBoard[i][j]){
+        blockElem.classList.add('exist');
+      }
+      blockElem.style.top = i*BLOCK_HEIGHT + 'px';
+      blockElem.style.left = j*BLOCK_WIDTH + 'px';
+      boardElem.appendChild(blockElem);
+    }
+  }
 
+  return boardElem;
 }
 
 function draw_nextBlock(){
@@ -211,13 +317,21 @@ function draw_nextBlock(){
       return blockElem;
 }
 
-function draw_score(/*game*/){
-  /*var score = game.getScore();*/
+function draw_score(game){
+  var score = game.getScore();
   var scoreElem = document.createElement('div');
   scoreElem.classList.add('tetrisScore');
   scoreElem.innerHTML =
-      "<p> score : 10000 </p>";
+      "<p> score : "+score+" </p>";
       /*만약 pause나 gameover이면 여기다가 if문으로 컨트롤 해 주어야 한다.*/
+      if(game.ispaused){
+        scoreElem.innerHTML =
+            "<p> Paused </p>";
+      }
+      if(game.isGameOver){
+        scoreElem.innerHTML =
+            "<p> GameOver </p>";
+      }
 
   return scoreElem;
 }
@@ -234,4 +348,80 @@ function draw_keys(){
       "<tr><th>r</th><td>Restart game</td></tr>" +
       "</table>";
   return usageElem;
+}
+
+function redraw(game, isPaused, containerElem) {
+  var gameElem = draw_tetris(game, isPaused);
+  containerElem.innerHTML = '';
+  containerElem.appendChild(gameElem);
+}
+
+function tetris_run(containerElem) {
+  var game = new TetrisGame();
+
+  play();
+
+  function play() {
+    var intervalHandler = setInterval(
+      function () {
+        if (game.go()){
+          redraw(game, false, containerElem);
+        }
+      },
+      FALLING_TIME
+    );
+
+    function keyHandler(kev) {
+        if (kev.shiftKey || kev.altKey || kev.metaKey)
+          return;
+        var consumed = true;
+        var mustpause = false;
+        if (kev.keyCode === KEY_ENTER) {
+          mustpause = true;
+        } else if (kev.keyCode === KEY_R) {
+          game = new TetrisGame();
+        } else if (kev.keyCode === KEY_LEFT) {
+          game.steerLeft();
+        } else if (kev.keyCode === KEY_RIGHT) {
+          game.steerRight();
+        } else if (kev.keyCode === KEY_DOWN) {
+          game.steerDown();
+        } else if (kev.keyCode === KEY_A) {
+          game.rotateLeft();
+        } else if (kev.keyCode === KEY_D) {
+          game.rotateRight();
+        } else if (kev.keyCode === KEY_SPACE) {
+          game.letFall();
+        } else {
+          consumed = false;
+        }
+        if (consumed) {
+          kev.preventDefault();
+          if (mustpause) {
+            containerElem.removeEventListener('keydown', keyHandler);
+            clearInterval(intervalHandler);
+            game.ispaused = true;
+            pause();
+          } else {
+            redraw(game, false, containerElem);
+          }
+        }
+    }
+
+    containerElem.addEventListener('keydown', keyHandler);
+  }
+
+  function pause(){
+    function keyHandler(keyValue){
+      if(keyValue.keyCode == KEY_ENTER){
+        containerElem.removeEventListener('keydown',keyHandler);
+        game.ispaused = false;
+        play();
+      }
+
+      containerElem.addEventListener('keydown', keyHandler);
+      redraw(game, true, containerElem);
+    }
+  }
+
 }
