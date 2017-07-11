@@ -82,7 +82,7 @@ function intersectCheck(y,x,block,board){
   for(var i = 0; i < 4; i++){
     for(var j = 0; j < 4; j++){
       if(block[i][j]){
-        if( i + y >= BOARD_HEIGHT || j + x > BOARD_WIDTH || j + x < 0 || board[y+i][x+j]){
+        if( i + y >= BOARD_HEIGHT || j + x >= BOARD_WIDTH || j + x < 0 || board[y+i][x+j]){
           return true; /* 움직였을 때 어떤 물체 또는 board 끝에 겹침을 뜻함*/
         }
       }
@@ -101,7 +101,6 @@ function applyBlock(y,x,block,board){
   for(var i = 0; i < 4; i++){
     for(var j = 0; j < 4; j++){
       if(block[i][j]){
-        newBoard[i][j] = 0;
         newBoard[i+y][j+x] = 1;
       }
     }
@@ -125,6 +124,7 @@ function deleteLine(board){
     }
 
     for(var i = 0; i < count; i++){
+      newBoard[i] = [];
       for(var j = 0; j < BOARD_WIDTH; j++){
         newBoard[i][j] = 0;
       }
@@ -161,9 +161,8 @@ function deleteLine(board){
 
    /*interval 함수의 인자로 쓰일 함수이다. 시간 간격 이후에 할 일을 정의한다.*/
    TetrisGame.prototype.go = function() {
-     /*document.write(this.blockY+"</br>");*/
-     /*document.write(this.board + "</br>");*/
-     if(TetrisGame.isGameOver){
+
+     if(this.isGameOver){
        return false;
      }
 
@@ -171,14 +170,18 @@ function deleteLine(board){
        this.board = applyBlock(this.blockY, this.blockX ,this.currentBlock, this.board);
        var r = deleteLine(this.board);
        this.board = r.board;
-       this.score += r.deleteLine;
+       this.score += r.deletedLineCount;
+       if(intersectCheck( 0, 3 ,this.nextBlock, this.board)){
+         this.isGameOver = true;
+         return false;
+       }
        this.currentBlock = this.nextBlock;
        this.nextBlock = randomBlock();
        this.blockX = 3;
        this.blockY = 0;
      }else{
        this.blockY += 1;
-       /*여기에 뭔가 블록의 이동을 그려주는 부분이 있어야 할듯 한데*/
+
      }
      return true;
    }
@@ -235,6 +238,14 @@ TetrisGame.prototype.getisGameover = function() {
 
 TetrisGame.prototype.getisPause = function() {
   return this.isPause;
+}
+
+TetrisGame.prototype.setisGameover = function(bool) {
+  this.isGameOver = bool;
+}
+
+TetrisGame.prototype.setIsPause = function(bool) {
+  this.isPause = bool;
 }
 
 TetrisGame.prototype.getScore = function() {
@@ -325,11 +336,11 @@ function draw_score(game){
   scoreElem.innerHTML =
       "<p> score : "+score+" </p>";
       /*만약 pause나 gameover이면 여기다가 if문으로 컨트롤 해 주어야 한다.*/
-      if(game.ispaused){
+      if(game.getisPause()){
         scoreElem.innerHTML +=
             "<p> Paused </p>";
       }
-      if(game.isGameOver){
+      if(game.getisGameover()){
         scoreElem.innerHTML +=
             "<p> GameOver </p>";
       }
@@ -401,7 +412,7 @@ function tetris_run(containerElem) {
           if (mustpause) {
             containerElem.removeEventListener('keydown', keyHandler);
             clearInterval(intervalHandler);
-            game.ispaused = true;
+            game.setIsPause(true);
             pause();
           } else {
             redraw(game, false, containerElem);
@@ -413,16 +424,17 @@ function tetris_run(containerElem) {
   }
 
   function pause(){
+
     function keyHandler(keyValue){
-      if(keyValue.keyCode == KEY_ENTER){
+      if(keyValue.keyCode === KEY_ENTER){
         containerElem.removeEventListener('keydown',keyHandler);
-        game.ispaused = false;
+        game.setIsPause(false);
         play();
       }
-
-      containerElem.addEventListener('keydown', keyHandler);
-      redraw(game, true, containerElem);
     }
+
+    containerElem.addEventListener('keydown', keyHandler);
+    redraw(game, true, containerElem);
   }
 
 }
