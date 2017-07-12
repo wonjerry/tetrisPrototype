@@ -106,7 +106,6 @@ function applyBlock(y,x,block,board){
       }
     }
   }
-
   return newBoard;
 }
 
@@ -115,8 +114,8 @@ function deleteLine(board){
     var count = BOARD_HEIGHT;
     for(var i=BOARD_HEIGHT; i --> 0;){
       for(var j=0; j<BOARD_WIDTH; j++){
-        if(!board[i][j]){/* 0인 성분이 있으면 한줄이 다 안채워진것이므로 붙여넣기 해 준다.*/
-          /*count--로 아래부터 새로운 board를 채워주는 이유는 맨 아래줄부터 1로 채워진 줄이 있다면 자동적으로
+        if(!board[i][j]){/* 0인 성분이 있으면 한줄이 다 안 채워진 것이므로 붙여넣기 해 준다.*/
+          /*--count로 아래부터 새로운 board를 채워주는 이유는 맨 아래줄부터 1로 채워진 줄이 있다면 자동적으로
           새로운 board에는 추가되지 않기 때문이다. 이 이후에 맨위부터 count까지는 0으로 채워 주어야 한다.*/
           newBoard[--count] = board[i].slice();
           break;
@@ -162,7 +161,6 @@ function deleteLine(board){
 
    /*interval 함수의 인자로 쓰일 함수이다. 시간 간격 이후에 할 일을 정의한다.*/
    TetrisGame.prototype.go = function() {
-
      if(this.isGameOver){
        return false;
      }
@@ -287,12 +285,12 @@ function draw_tetrisRightPanel(game) {
 function draw_tetrisLeftPanel(game){
   var leftPanel = document.createElement('div');
   leftPanel.classList.add('tetrisLeftPanel');
-  var nextBlockPanel = draw_nextBlock();
+  var nextBlockPanel = draw_nextBlock(game);
   var scorePanel = draw_score(game);
   var keysPanel = draw_keys();
 
-  leftPanel.append(scorePanel);
   leftPanel.append(nextBlockPanel);
+  leftPanel.append(scorePanel);
   leftPanel.append(keysPanel);
   return leftPanel;
 }
@@ -322,13 +320,10 @@ function draw_tetrisBoard(game){
   return boardElem;
 }
 
-function draw_nextBlock(){
-  var blockElem = document.createElement('div');
+function draw_nextBlock(game){
+  var blockElem = draw_block(game.nextBlock,4,4);
   blockElem.classList.add('tetrisNextblock');
-  blockElem.innerHTML =
-      "<p>블록이 오는 자리</p>";
-      /*만약 pause나 gameover이면 여기다가 if문으로 컨트롤 해 주어야 한다.*/
-      return blockElem;
+  return blockElem;
 }
 
 function draw_score(game){

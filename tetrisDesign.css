@@ -1,16 +1,27 @@
-div.tetrisRightPanel div.tetrisBoard {
-  position: absolute;
-  left: 0;
-  top: 0;
+div.tetrisGame div.tetrisRightPanel div.tetrisBoard {
+  display: inline-block;
   width: 300px;  /* 10 cols * 30px */
   height: 600px;  /* 20 rows * 30px */
 }
-div.tetrisRightPanel {
+div.tetrisGame div.tetrisRightPanel {
   position: absolute;
+  top: 0;
   left: 300px;
-  top: 0px;
   width: 300px;
   height: 600px;
+}
+
+div.tetrisGame div.tetrisLeftPanel {
+  display: inline-block;
+  top: 0;
+  width: 300px;
+  height: 600px;
+  left: 50%;
+}
+
+div.tetrisLeftPanel div.tetrisNextblock{
+  width: 120px;
+  height: 120px;
 }
 
 div.tetrisBlock {
@@ -26,20 +37,28 @@ div.tetrisBlock.exist {
   background-color: gray;
 }
 
-div.tetrisLeftPanel{
+div.tetrisBoard div.tetrisBlock {
+  position: absolute;
+  width: 29px;
+  height: 29px;
   border: 1px solid black;
+  background-color: black;
 }
 
-html, body {
-    height: 100%;
+div.tetrisBoard div.tetrisBlock.exist {
+  border: 1px solid black;
+  background-color: gray;
 }
 
-html {
-    display: table;
-    margin: auto;
+div.tetrisGame{
+  transform: translate(25% , 15%);
 }
 
-body {
-    display: table-cell;
-    vertical-align: middle;
+div.tetrisScore{
+  margin-top: 20px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
 }
