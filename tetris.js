@@ -148,6 +148,13 @@ function deleteLine(board){
      this.score = 0;
      this.currentBlock = randomBlock();
      this.nextBlock = randomBlock();
+     this.holdable = true;
+     this.holdBlock = [
+       [0,0,0,0],
+       [0,0,0,0],
+       [0,0,0,0],
+       [0,0,0,0]
+     ];
 
      this.board = [];
 
@@ -161,7 +168,7 @@ function deleteLine(board){
 
    /*interval 함수의 인자로 쓰일 함수이다. 시간 간격 이후에 할 일을 정의한다.*/
    TetrisGame.prototype.go = function() {
-     if(this.isGameOver){
+     if(this.getisGameover()){
        return false;
      }
 
@@ -170,14 +177,15 @@ function deleteLine(board){
        var r = deleteLine(this.board);
        this.board = r.board;
        this.score += r.deletedLineCount*r.deletedLineCount*10;
+       this.setHoldable(true);
        if(intersectCheck( 0, 3 ,this.nextBlock, this.board)){
-         this.isGameOver = true;
-         return false;
+         this.setIsGameover(true);
+       }else{
+         this.currentBlock = this.nextBlock;
+         this.nextBlock = randomBlock();
+         this.blockX = 3;
+         this.blockY = 0;
        }
-       this.currentBlock = this.nextBlock;
-       this.nextBlock = randomBlock();
-       this.blockX = 3;
-       this.blockY = 0;
      }else{
        this.blockY += 1;
 
@@ -221,6 +229,20 @@ TetrisGame.prototype.letFall = function() {
   while(!intersectCheck(this.blockY + 1, this.blockX ,this.currentBlock, this.board)){
       this.blockY += 1;
    }
+   this.go();
+}
+
+TetrisGame.prototype.hold = function() {
+  this.holdable = false;
+  if(this.holdBlock.indexOf("1") === -1){
+    this.holdBlock = this.currentBlock;
+    this.currentBlock = this.nextBlock;
+    this.nextBlock = randomBlock();
+  }else{
+    var tempblock = this.holdBlock;
+    this.holdBlock = this.currentBlock;
+    this.currentBlock = tempblock;
+  }
 }
 
 TetrisGame.prototype.getBlockX = function() {
@@ -258,6 +280,22 @@ TetrisGame.prototype.getNextBlock = function() {
   return this.nextBlock;
 }
 
+TetrisGame.prototype.setHoldBlock = function(input) {
+  this.holdBlock = input;
+}
+
+TetrisGame.prototype.getHoldBlock = function() {
+  return this.holdBlock;
+}
+
+TetrisGame.prototype.getHoldable = function() {
+  return this.holdable;
+}
+
+TetrisGame.prototype.setHoldable = function(input) {
+  this.holdable = input;
+}
+
 TetrisGame.prototype.getBoard = function() {
   return applyBlock(this.blockY, this.blockX ,this.currentBlock, this.board);
 }
@@ -268,8 +306,10 @@ function draw_tetris(game, ispaused){
   gameElem.classList.add('tetrisGame');
   var leftPanel = draw_tetrisLeftPanel(game);
   var rightPanel = draw_tetrisRightPanel(game);
+  var subPanel = draw_subPanel(game);
   gameElem.append(leftPanel);
   gameElem.append(rightPanel);
+  gameElem.append(subPanel);
 
   return gameElem;
 }
@@ -285,6 +325,7 @@ function draw_tetrisRightPanel(game) {
 function draw_tetrisLeftPanel(game){
   var leftPanel = document.createElement('div');
   leftPanel.classList.add('tetrisLeftPanel');
+  leftPanel.innerHTML = "<p> NEXT </p>";
   var nextBlockPanel = draw_nextBlock(game);
   var scorePanel = draw_score(game);
   var keysPanel = draw_keys();
@@ -293,6 +334,16 @@ function draw_tetrisLeftPanel(game){
   leftPanel.append(scorePanel);
   leftPanel.append(keysPanel);
   return leftPanel;
+}
+
+function draw_subPanel(game){
+  var subPanel = document.createElement('div');
+  subPanel.classList.add('tetrisSubPanel');
+  subPanel.innerHTML = "<p> HOLD </p>";
+  var holdBlockBoard = draw_block(game.getHoldBlock() , 4 , 4);
+  holdBlockBoard.classList.add('tetrisHoldBlockBoard');
+  subPanel.append(holdBlockBoard);
+  return subPanel;
 }
 
 function draw_block( borad, rowNum, colNum){
@@ -353,6 +404,7 @@ function draw_keys(){
       "<tr><th>Cursor Keys</th><td>Steer</td></tr>" +
       "<tr><th>a/s/up key</th><td>Rotate</td></tr>" +
       "<tr><th>Space bar</th><td>Let fall</td></tr>" +
+      "<tr><th>shift</th><td>hold block</td></tr>" +
       "<tr><th>Enter</th><td>Toggle pause</td></tr>" +
       "<tr><th>r</th><td>Restart game</td></tr>" +
       "</table>";
@@ -381,7 +433,7 @@ function tetris_run(containerElem) {
     );
 
     function keyHandler(kev) {
-        if (kev.shiftKey || kev.altKey || kev.metaKey)
+        if ( kev.altKey || kev.metaKey)
           return;
         var consumed = true;
         var mustpause = false;
@@ -403,6 +455,9 @@ function tetris_run(containerElem) {
           game.rotateRight();
         } else if (kev.keyCode === KEY_SPACE) {
           game.letFall();
+        } else if (kev.shiftKey) {
+          if(game.getHoldable())
+            game.hold();
         } else {
           consumed = false;
         }
