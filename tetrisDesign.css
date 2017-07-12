@@ -25,3 +25,21 @@ div.tetrisBlock.exist {
   border: 1px solid black;
   background-color: gray;
 }
+
+div.tetrisLeftPanel{
+  border: 1px solid black;
+}
+
+html, body {
+    height: 100%;
+}
+
+html {
+    display: table;
+    margin: auto;
+}
+
+body {
+    display: table-cell;
+    vertical-align: middle;
+}

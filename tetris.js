@@ -11,8 +11,9 @@ var KEY_SPACE = 32;
 var KEY_LEFT = 37;
 var KEY_RIGHT = 39;
 var KEY_DOWN = 40;
+var KEY_UP = 38;
 var KEY_A = 65;
-var KEY_D = 68;
+var KEY_S = 83;
 var KEY_R = 82;
 
 var BLOCKS = [
@@ -170,7 +171,7 @@ function deleteLine(board){
        this.board = applyBlock(this.blockY, this.blockX ,this.currentBlock, this.board);
        var r = deleteLine(this.board);
        this.board = r.board;
-       this.score += r.deletedLineCount;
+       this.score += r.deletedLineCount*r.deletedLineCount*10;
        if(intersectCheck( 0, 3 ,this.nextBlock, this.board)){
          this.isGameOver = true;
          return false;
@@ -240,7 +241,7 @@ TetrisGame.prototype.getisPause = function() {
   return this.isPause;
 }
 
-TetrisGame.prototype.setisGameover = function(bool) {
+TetrisGame.prototype.setIsGameover = function(bool) {
   this.isGameOver = bool;
 }
 
@@ -296,19 +297,13 @@ function draw_tetrisLeftPanel(game){
   return leftPanel;
 }
 
-function draw_block(game){
-
-}
-
-function draw_tetrisBoard(game){
+function draw_block( borad, rowNum, colNum){
   var boardElem = document.createElement('div');
-  boardElem.classList.add('tetrisBoard');
-  var gameBoard = game.getBoard();
-  for(var i = 0; i < BOARD_HEIGHT; i++){
-    for(var j = 0; j < BOARD_WIDTH; j++){
+  for(var i = 0; i < rowNum; i++){
+    for(var j = 0; j < colNum; j++){
       var blockElem = document.createElement('div');
       blockElem.classList.add('tetrisBlock');
-      if(gameBoard[i][j]){
+      if(borad[i][j]){
         blockElem.classList.add('exist');
       }
       blockElem.style.top = i*BLOCK_HEIGHT + 'px';
@@ -317,6 +312,13 @@ function draw_tetrisBoard(game){
     }
   }
 
+  return boardElem;
+}
+
+function draw_tetrisBoard(game){
+  var gameBoard = game.getBoard();
+  var boardElem = draw_block(gameBoard,BOARD_HEIGHT,BOARD_WIDTH);
+  boardElem.classList.add('tetrisBoard');
   return boardElem;
 }
 
@@ -354,7 +356,7 @@ function draw_keys(){
   usageElem.innerHTML =
       "<table>" +
       "<tr><th>Cursor Keys</th><td>Steer</td></tr>" +
-      "<tr><th>a/s</th><td>Rotate</td></tr>" +
+      "<tr><th>a/s/up key</th><td>Rotate</td></tr>" +
       "<tr><th>Space bar</th><td>Let fall</td></tr>" +
       "<tr><th>Enter</th><td>Toggle pause</td></tr>" +
       "<tr><th>r</th><td>Restart game</td></tr>" +
@@ -392,7 +394,9 @@ function tetris_run(containerElem) {
           mustpause = true;
         } else if (kev.keyCode === KEY_R) {
           game = new TetrisGame();
-        } else if (kev.keyCode === KEY_LEFT) {
+        } else if (kev.keyCode === KEY_UP) {
+          game.rotateLeft();
+        }else if (kev.keyCode === KEY_LEFT) {
           game.steerLeft();
         } else if (kev.keyCode === KEY_RIGHT) {
           game.steerRight();
@@ -400,7 +404,7 @@ function tetris_run(containerElem) {
           game.steerDown();
         } else if (kev.keyCode === KEY_A) {
           game.rotateLeft();
-        } else if (kev.keyCode === KEY_D) {
+        } else if (kev.keyCode === KEY_S) {
           game.rotateRight();
         } else if (kev.keyCode === KEY_SPACE) {
           game.letFall();
