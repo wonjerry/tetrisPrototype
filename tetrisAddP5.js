@@ -59,7 +59,7 @@ var BLOCKS = [
     [0,1,1,0],
     [0,0,0,0],
   ]
-]
+];
 /*지금은 배열을 이용하여 블록을 표시 및 회전 하였지만 전반적인 개발을 일단 마치면 bitmask방식으로 바꿔볼 예정이다.*/
 function rotateRight(block){
   return [
