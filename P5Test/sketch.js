@@ -229,10 +229,10 @@ if(!intersectCheck(this.blockY, this.blockX ,newBlock, this.board)){
 }
 
 TetrisGame.prototype.letFall = function() {
-while(!intersectCheck(this.blockY + 1, this.blockX ,this.currentBlock, this.board)){
-   this.blockY += 1;
-}
-this.go();
+  while(!intersectCheck(this.blockY + 1, this.blockX ,this.currentBlock, this.board)){
+     this.blockY += 1;
+  }
+  this.go();
 }
 
 TetrisGame.prototype.hold = function() {
@@ -318,12 +318,31 @@ function setup() {
   createCanvas(600, 600);
   noStroke();
   textSize(20);
-  game = new TetrisGame();
+  frameRate(30);
+  noLoop();
+  tetris_run();
 }
 
 function draw(){
-  draw_tetrisLeftPanel(game);
-  draw_tetrisRightPanel(game);
+    draw_tetrisLeftPanel(game);
+    draw_tetrisRightPanel(game);
+}
+
+function tetris_run() {
+  game = new TetrisGame();
+
+  play();
+
+  function play() {
+    var intervalHandler = setInterval(
+      function () {
+        if (game.go()){
+          redraw();
+        }
+      },
+      FALLING_TIME
+    );
+  }
 }
 
 function keyPressed(){
@@ -393,15 +412,16 @@ function draw_nextBlock(board){
 function draw_score(isPaused, isGameOver){
   var x=20;
   var y=20;
+  var str = 'score : ' + game.getScore();
   push();
   translate(0,200);
-  text("score : " + game.getScore(), x, y);
+  text(str, x, y);
 
-  if(isPaused){
+  if(game.getisPause()){
     text("PAUSED", 40, y+=20);
   }
 
-  if(isGameOver){
+  if(game.getisGameover()){
     text("GAME OVER", 40, y+=20);
   }
 
