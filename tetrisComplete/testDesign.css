@@ -1,0 +1,8 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+canvas#defaultCanvas0{
+  transform: translate(50% , 25%);
+}
