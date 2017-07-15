@@ -12,44 +12,44 @@ var KEY_SHIFT = 16;
 var BLOCKS = [
   [
     [0,0,0,0],
-    [0,1,1,0],
-    [0,1,1,0],
+    [0,11,11,0],
+    [0,11,11,0],
     [0,0,0,0],
   ],
   [
-    [0,0,1,0],
-    [0,0,1,0],
-    [0,0,1,0],
-    [0,0,1,0],
+    [0,0,12,0],
+    [0,0,12,0],
+    [0,0,12,0],
+    [0,0,12,0],
   ],
   [
     [0,0,0,0],
-    [0,1,1,0],
-    [0,0,1,1],
+    [0,13,13,0],
+    [0,0,13,13],
     [0,0,0,0],
   ],
   [
     [0,0,0,0],
-    [0,0,1,1],
-    [0,1,1,0],
+    [0,0,14,14],
+    [0,14,14,0],
     [0,0,0,0],
   ],
   [
-    [0,0,1,0],
-    [0,1,1,0],
-    [0,0,1,0],
+    [0,0,15,0],
+    [0,15,15,0],
+    [0,0,15,0],
     [0,0,0,0],
   ],
   [
-    [0,1,0,0],
-    [0,1,0,0],
-    [0,1,1,0],
+    [0,16,0,0],
+    [0,16,0,0],
+    [0,16,16,0],
     [0,0,0,0],
   ],
   [
-    [0,0,1,0],
-    [0,0,1,0],
-    [0,1,1,0],
+    [0,0,17,0],
+    [0,0,17,0],
+    [0,17,17,0],
     [0,0,0,0],
   ]
 ];
@@ -98,7 +98,7 @@ function applyBlock(y,x,block,board){
   for(var i = 0; i < 4; i++){
     for(var j = 0; j < 4; j++){
       if(block[i][j]){
-        newBoard[i+y][j+x] = 1;
+        newBoard[i+y][j+x] = block[i][j];
       }
     }
   }
@@ -413,13 +413,32 @@ function draw_block(board, rowNum, colNum ,Sx,Sy){
       /*뭔가 for문안에서 push pop이 발생하니 느릴 것 같다.*/
       push();
       translate(Sx + j*BLOCK_WIDTH ,Sy + i*BLOCK_HEIGHT);
-      if(board[i][j]){
-        fill(color('#A9A9A9'));/*gray*/
-        rect(0,0,BLOCK_WIDTH,BLOCK_HEIGHT);
-      }else{
-        fill(color('#000000'));/*black*/
-        rect(0,0,BLOCK_WIDTH,BLOCK_HEIGHT);
+      var colorType = '#000000';
+      switch (board[i][j]) {
+        case 11:
+          colorType = '#ff0000';
+          break;
+        case 12:
+          colorType = '#7cfc00';
+          break;
+        case 13:
+          colorType = '#000080';
+          break;
+        case 14:
+          colorType = '#00ffff';
+          break;
+        case 15:
+          colorType = '#8a2be2';
+          break;
+        case 16:
+          colorType = '#ffff00';
+          break;
+        case 17:
+          colorType = '#1a8072';
+          break;
       }
+      fill(color(colorType));/*black*/
+      rect(0,0,BLOCK_WIDTH,BLOCK_HEIGHT);
       pop();
     }
   }
