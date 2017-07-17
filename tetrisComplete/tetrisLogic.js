@@ -247,7 +247,7 @@ TetrisGame.prototype.hold = function() {
   }
 
 }
-
+/*이부분이랑 다른 블록과 관련된 부분을 shape라는 객체로 만들면 더 직관적으로 사용할 수 있을듯 하다.*/
 function clone(origin,target){
   for(var i = 0; i < 4; i++){
     target[i] = origin[i].slice();
@@ -416,25 +416,25 @@ function draw_block(board, rowNum, colNum ,Sx,Sy){
       var colorType = '#000000';
       switch (board[i][j]) {
         case 11:
-          colorType = '#ff0000';
+          colorType = '#ed0345';
           break;
         case 12:
-          colorType = '#7cfc00';
+          colorType = '#ef6a32';
           break;
         case 13:
-          colorType = '#000080';
+          colorType = '#fbbf45';
           break;
         case 14:
-          colorType = '#00ffff';
+          colorType = '#aad962';
           break;
         case 15:
-          colorType = '#8a2be2';
+          colorType = '#03c383';
           break;
         case 16:
-          colorType = '#ffff00';
+          colorType = '#017351';
           break;
         case 17:
-          colorType = '#1a8072';
+          colorType = '#a12a5e';
           break;
       }
       fill(color(colorType));/*black*/
