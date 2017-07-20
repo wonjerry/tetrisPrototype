@@ -14,7 +14,7 @@ var KEY_SPACE = 32;
 var KEY_SHIFT = 16;
 
 /*game 객체와 일정시간 반복을 위한 handler 객체를 전역으로 정의하였다.*/
-var game;
+var game = [];
 var intervalHandler;
 
 
@@ -196,6 +196,9 @@ function TetrisGame(){
       this.board[i][j] = 0;
     }
   }
+
+  this.startX = 0;
+  this.startY = 0;
 }
 
 /*interval 함수의 인자로 쓰일 함수이다. 시간 간격 이후에 할 일을 정의한다.
@@ -351,15 +354,23 @@ return this.block.applyBlock(this.block.Y, this.block.X ,this.block.currentBlock
 
 function tetris_run() {
   clearInterval(intervalHandler);
-  game = new TetrisGame();
+  game[0] = new TetrisGame();
+  game[1] = new TetrisGame();
+  game[1].startX = 360;
+  game[2] = new TetrisGame();
+  game[2].startX = 720;
+  game[3] = new TetrisGame();
+  game[3].startX = 1080;
   play();
 }
 
 function play() {
   intervalHandler = setInterval(
     function () {
-      if (game.go()){
-        redraw();
+      for(var i =0; i<4; i++){
+        if (game[i].go()){
+          redraw();
+        }
       }
     },
     FALLING_TIME
@@ -368,9 +379,9 @@ function play() {
 
 function keyPressed(){
   var mustpause = false;
-  if(game.getisPause()){
+  if(game[0].getisPause()){
     if(keyCode === ENTER){
-      game.setIsPause(false);
+      game[0].setIsPause(false);
       play();
     }else if(key === 'R'){
       tetris_run();
@@ -381,28 +392,28 @@ function keyPressed(){
     }else if(key === 'R'){
       tetris_run();
     }else if(key === 'A'){
-      game.rotateLeft();
+      game[0].rotateLeft();
     }else if(key === 'S'){
-      game.rotateRight();
+      game[0].rotateRight();
     }else if(keyCode === KEY_SPACE){/*space bar*/
-      game.letFall();
+      game[0].letFall();
     }else if(keyCode === KEY_SHIFT){/*shift*/
-      if(game.getHoldable()){
-        game.hold();
+      if(game[0].getHoldable()){
+        game[0].hold();
       }
     }else if(keyCode === LEFT_ARROW){
-      game.steerLeft();
+      game[0].steerLeft();
     }else if(keyCode === RIGHT_ARROW){
-      game.steerRight();
+      game[0].steerRight();
     }else if(keyCode === DOWN_ARROW){
-      game.steerDown();
+      game[0].steerDown();
     }else if(keyCode === UP_ARROW){
-      game.rotateRight();
+      game[0].rotateRight();
     }
 
     if (mustpause) {
       clearInterval(intervalHandler);
-      game.setIsPause(true);
+      game[0].setIsPause(true);
     }
     redraw();
 
@@ -413,7 +424,7 @@ function keyPressed(){
 
 /*P5.js의 메소드 이다. 프로그램이 실행 되기전 전처리를 맡는다.*/
 function setup() {
-  createCanvas(310, 850);
+  createCanvas(1500, 850);
   textSize(20);
   noLoop();
   tetris_run();
@@ -423,16 +434,18 @@ function setup() {
 
 function draw(){
     clear();
-    var startX = 0,startY = 0;
-    draw_nextBlock(game.getNextBlock(),startX,startY);
-    draw_holdBlock(game.getHoldBlock(),startX,startY);
-    draw_tetrisBoard(game.getBoard(),startX,startY);
-    draw_score(startX,startY);
-    draw_state(game.getisPause(),game.getisGameover(),startX,startY)
+    for(var i =0; i<4; i++){
+      draw_nextBlock(game[i].getNextBlock(),game[i].startX,0);
+      draw_holdBlock(game[i].getHoldBlock(),game[i].startX,0);
+      draw_tetrisBoard(game[i].getBoard(),game[i].startX,0);
+      draw_score(game[i].startX,0);
+      draw_state(game[i].getisPause(),game[i].getisGameover(),game[i].startX,0);
+    }
+
 }
 
-function draw_tetrisBoard(board,Sx,Sx){
-  draw_block(board,BOARD_HEIGHT,BOARD_WIDTH,0+Sx,170+Sx);
+function draw_tetrisBoard(board,Sx,Sy){
+  draw_block(board,BOARD_HEIGHT,BOARD_WIDTH,0+Sx,170+Sy);
 }
 
 function draw_block(board, rowNum, colNum ,Sx,Sy){
@@ -491,29 +504,30 @@ function draw_holdBlock(board,Sx,Sy){
 
 function draw_score(Sx,Sy){
   var str = "SCORE";
-  var score = game.getScore();
+  var score = game[0].getScore();
   push();
-  translate(0,790);
+  translate(0+Sx,790+Sy);
   rect(0, 0, 120, 50);
-  text(str, 10+Sx, 20+Sy);
-  text(score, 10+Sx, 45+Sy);
+  text(str, 10, 20);
+  text(score, 10, 45);
   pop();
 }
 
 function draw_state(isPaused, isGameOver,Sx,Sy){
   push();
-  translate(180,790);
+  translate(180+Sx,790+Sy);
   rect(0, 0, 120, 50);
 
   if(isGameOver){
-    text("GAME OVER", 10+Sx, 35+Sy);
+    text("GAME OVER", 10, 35);
+    pop();
     return;
   }
 
   if(isPaused){
-    text("PAUSED", 25+Sx, 35+Sy);
+    text("PAUSED", 25, 35);
   }
-
+  pop();
 }
 
 function draw_keys(){
