@@ -14,7 +14,7 @@ var KEY_SPACE = 32;
 var KEY_SHIFT = 16;
 
 /*game 객체와 일정시간 반복을 위한 handler 객체를 전역으로 정의하였다.*/
-var game = [];
+var game;
 var intervalHandler;
 
 
@@ -354,23 +354,16 @@ return this.block.applyBlock(this.block.Y, this.block.X ,this.block.currentBlock
 
 function tetris_run() {
   clearInterval(intervalHandler);
-  game[0] = new TetrisGame();
-  game[1] = new TetrisGame();
-  game[1].startX = 360;
-  game[2] = new TetrisGame();
-  game[2].startX = 720;
-  game[3] = new TetrisGame();
-  game[3].startX = 1080;
+  game = new TetrisGame();
   play();
 }
 
 function play() {
   intervalHandler = setInterval(
     function () {
-      for(var i =0; i<4; i++){
-        if (game[i].go()){
-          redraw();
-        }
+      if (game.go()){
+        redraw();
+        console.log('hi');
       }
     },
     FALLING_TIME
@@ -379,9 +372,9 @@ function play() {
 
 function keyPressed(){
   var mustpause = false;
-  if(game[0].getisPause()){
+  if(game.getisPause()){
     if(keyCode === ENTER){
-      game[0].setIsPause(false);
+      game.setIsPause(false);
       play();
     }else if(key === 'R'){
       tetris_run();
@@ -392,28 +385,29 @@ function keyPressed(){
     }else if(key === 'R'){
       tetris_run();
     }else if(key === 'A'){
-      game[0].rotateLeft();
+      game.rotateLeft();
     }else if(key === 'S'){
-      game[0].rotateRight();
+      game.rotateRight();
     }else if(keyCode === KEY_SPACE){/*space bar*/
-      game[0].letFall();
+      game.letFall();
     }else if(keyCode === KEY_SHIFT){/*shift*/
-      if(game[0].getHoldable()){
-        game[0].hold();
+      if(game.getHoldable()){
+        game.hold();
       }
     }else if(keyCode === LEFT_ARROW){
-      game[0].steerLeft();
+      game.steerLeft();
     }else if(keyCode === RIGHT_ARROW){
-      game[0].steerRight();
+      game.steerRight();
     }else if(keyCode === DOWN_ARROW){
-      game[0].steerDown();
+      game.steerDown();
     }else if(keyCode === UP_ARROW){
-      game[0].rotateRight();
+      game.rotateRight();
     }
 
     if (mustpause) {
       clearInterval(intervalHandler);
-      game[0].setIsPause(true);
+      intervalHandler = -1;
+      game.setIsPause(true);
     }
     redraw();
 
@@ -424,7 +418,7 @@ function keyPressed(){
 
 /*P5.js의 메소드 이다. 프로그램이 실행 되기전 전처리를 맡는다.*/
 function setup() {
-  createCanvas(1500, 850);
+  createCanvas(310, 850);
   textSize(20);
   noLoop();
   tetris_run();
@@ -434,14 +428,11 @@ function setup() {
 
 function draw(){
     clear();
-    for(var i =0; i<4; i++){
-      draw_nextBlock(game[i].getNextBlock(),game[i].startX,0);
-      draw_holdBlock(game[i].getHoldBlock(),game[i].startX,0);
-      draw_tetrisBoard(game[i].getBoard(),game[i].startX,0);
-      draw_score(game[i].startX,0);
-      draw_state(game[i].getisPause(),game[i].getisGameover(),game[i].startX,0);
-    }
-
+    draw_nextBlock(game.getNextBlock(),game.startX,0);
+    draw_holdBlock(game.getHoldBlock(),game.startX,0);
+    draw_tetrisBoard(game.getBoard(),game.startX,0);
+    draw_score(game.getScore(),game.startX,0);
+    draw_state(game.getisPause(),game.getisGameover(),game.startX,0);
 }
 
 function draw_tetrisBoard(board,Sx,Sy){
@@ -502,9 +493,8 @@ function draw_holdBlock(board,Sx,Sy){
 
 }
 
-function draw_score(Sx,Sy){
+function draw_score(score,Sx,Sy){
   var str = "SCORE";
-  var score = game[0].getScore();
   push();
   translate(0+Sx,790+Sy);
   rect(0, 0, 120, 50);
