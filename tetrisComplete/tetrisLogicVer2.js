@@ -409,11 +409,11 @@ function keyPressed(){
   }
 }
 
-/*************여기서 부터는 게임 화면을 그리는 부분이다.****************/
+/*************여기서 부터는 게임 화면을 그리는 부분이다.****************혀/
 
 /*P5.js의 메소드 이다. 프로그램이 실행 되기전 전처리를 맡는다.*/
 function setup() {
-  createCanvas(800, 600);
+  createCanvas(310, 850);
   textSize(20);
   noLoop();
   tetris_run();
@@ -423,9 +423,12 @@ function setup() {
 
 function draw(){
     clear();
-    draw_tetrisLeftPanel(game);
-    draw_tetrisRightPanel(game);
-    draw_tetrisSubPanel(game);
+    var startX = 0,startY = 0;
+    draw_nextBlock(game.getNextBlock(),startX,startY);
+    draw_holdBlock(game.getHoldBlock(),startX,startY);
+    draw_tetrisBoard(game.getBoard(),startX,startY);
+    draw_score(startX,startY);
+    draw_state(game.getisPause(),game.getisGameover(),startX,startY)
 }
 
 function draw_tetrisRightPanel(game){
@@ -438,8 +441,8 @@ function draw_tetrisSubPanel(game){
   draw_holdBlock(board);
 }
 
-function draw_tetrisBoard(board){
-  draw_block(board,BOARD_HEIGHT,BOARD_WIDTH,300,0);
+function draw_tetrisBoard(board,Sx,Sx){
+  draw_block(board,BOARD_HEIGHT,BOARD_WIDTH,0+Sx,170+Sx);
 }
 
 function draw_block(board, rowNum, colNum ,Sx,Sy){
@@ -485,39 +488,48 @@ function draw_tetrisLeftPanel(game){
   draw_keys();
 }
 
-function draw_nextBlock(board){
+function draw_nextBlock(board,Sx,Sy){
   push();
-  translate(0,0);
-  text("Next Block", 20, 20);
-  draw_block(board,4,4,20,40);
+  translate(0 + Sx,0 + Sy);
+  text("Next Block", 0, 20);
+  pop();
+  draw_block(board,4,4,0+Sx,30+Sy);
 }
 
-function draw_holdBlock(board){
+function draw_holdBlock(board,Sx,Sy){
   push();
-  translate(620,0);
-  text("Hold Block", 20, 20);
+  translate(180+Sx,0+Sy);
+  text("Hold Block", 0, 20);
   pop();
-  draw_block(board,4,4,640,40);
+  draw_block(board,4,4,180+Sx,30+Sy);
 
 }
 
-function draw_score(isPaused, isGameOver){
-  var x=20;
-  var y=20;
-  var str = "SCORE : " + game.getScore();
+function draw_score(Sx,Sy){
+  var str = "SCORE";
+  var score = game.getScore();
   push();
-  translate(0,200);
-  text(str, x, y);
-
-  if(game.getisPause()){
-    text("PAUSED", 40, y+=40);
-  }
-
-  if(game.getisGameover()){
-    text("GAME OVER", 40, y+=40);
-  }
-
+  translate(0,790);
+  rect(0, 0, 120, 50);
+  text(str, 10+Sx, 20+Sy);
+  text(score, 10+Sx, 45+Sy);
   pop();
+}
+
+function draw_state(isPaused, isGameOver,Sx,Sy){
+  push();
+  translate(180,790);
+  rect(0, 0, 120, 50);
+
+  if(isGameOver){
+    text("GAME OVER", 10+Sx, 35+Sy);
+    return;
+  }
+
+  if(isPaused){
+    text("PAUSED", 25+Sx, 35+Sy);
+  }
+
 }
 
 function draw_keys(){
