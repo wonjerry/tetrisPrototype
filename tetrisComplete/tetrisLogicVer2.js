@@ -431,16 +431,6 @@ function draw(){
     draw_state(game.getisPause(),game.getisGameover(),startX,startY)
 }
 
-function draw_tetrisRightPanel(game){
-  var board = game.getBoard();
-  draw_tetrisBoard(board);
-}
-/*hold block을 그리기 위한 부분이다.*/
-function draw_tetrisSubPanel(game){
-  var board = game.getHoldBlock();
-  draw_holdBlock(board);
-}
-
 function draw_tetrisBoard(board,Sx,Sx){
   draw_block(board,BOARD_HEIGHT,BOARD_WIDTH,0+Sx,170+Sx);
 }
@@ -480,12 +470,6 @@ function draw_block(board, rowNum, colNum ,Sx,Sy){
       pop();
     }
   }
-}
-
-function draw_tetrisLeftPanel(game){
-  draw_nextBlock(game.getNextBlock());
-  draw_score(false,false);
-  draw_keys();
 }
 
 function draw_nextBlock(board,Sx,Sy){
